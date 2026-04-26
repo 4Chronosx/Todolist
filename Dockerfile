@@ -2,13 +2,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy everything from root
 COPY . .
 
-# Restore all projects via solution
-RUN dotnet restore TaskManager.sln
+RUN dotnet restore TaskManager.slnx
 
-# Publish the main Blazor Web App project
 RUN dotnet publish TaskManager.Api/TaskManager.Api.csproj \
     -c Release -o /app/publish
 
