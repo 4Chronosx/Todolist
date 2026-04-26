@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "dFrmX2sorKA=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Christian\\Documents\\03_Coding\\01_Projects\\Kanban-NET\\TaskManager\\TaskManager.Client\\TaskManager.Client.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Christian\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.3\\microsoft.aspnetcore.app.internal.assets.10.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

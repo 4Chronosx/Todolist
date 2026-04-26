@@ -1,0 +1,67 @@
+@if (IsOpen)
+{
+    <div class="dialog-overlay" @onclick="HandleOverlayClick">
+        <div class="dialog-box" @onclick:stopPropagation>
+            <div class="dialog-header">
+                <h3>@Title</h3>
+                <button type="button" class="dialog-close" @onclick="Close" aria-label="Close dialog">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="dialog-body">
+                <div class="dialog-field">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" @bind="InputTitle" placeholder="Enter title..." />
+                </div>
+                <div class="dialog-field">
+                    <label for="description">Description</label>
+                    <input type="text" id="description" @bind="InputDescription" placeholder="Enter description..." />
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button type="button" class="btn-cancel" @onclick="Close">Cancel</button>
+                <button type="button" class="btn-confirm" @onclick="Confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public bool IsOpen { get; set; } = false;
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<(string Title, string Description)> OnConfirm { get; set; }
+    [Parameter] public string InitialTitle { get; set; } = "";
+    [Parameter] public string InitialDescription { get; set; } = "";
+
+    private string InputTitle { get; set; } = "";
+    private string InputDescription { get; set; } = "";
+    private bool wasOpen;
+
+    protected override void OnParametersSet()
+    {
+        if (IsOpen && !wasOpen)
+        {
+            InputTitle = InitialTitle;
+            InputDescription = InitialDescription;
+        }
+
+        wasOpen = IsOpen;
+    }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task Confirm()
+    {
+        await OnConfirm.InvokeAsync((InputTitle, InputDescription));
+        await Close();
+    }
+
+    private async Task HandleOverlayClick()
+    {
+        await Close();
+    }
+}

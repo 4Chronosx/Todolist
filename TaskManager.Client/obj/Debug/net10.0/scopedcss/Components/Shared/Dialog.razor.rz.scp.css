@@ -1,0 +1,187 @@
+.dialog-overlay[b-xc0yi4vorz] {
+    position: fixed;
+    inset: 0;
+    background: rgba(24, 24, 29, 0.52);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 0.9rem;
+    padding-left: calc(0.9rem + env(safe-area-inset-left));
+    padding-right: calc(0.9rem + env(safe-area-inset-right));
+    padding-bottom: calc(0.9rem + env(safe-area-inset-bottom));
+    animation: overlay-fade-b-xc0yi4vorz 160ms ease-out;
+}
+
+.dialog-box[b-xc0yi4vorz] {
+    background: #f7f7f7;
+    border-radius: 8px;
+    width: min(92vw, 440px);
+    border: 1px solid rgba(108, 99, 255, 0.38);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
+    overflow: hidden;
+    max-height: min(88vh, 640px);
+    display: flex;
+    flex-direction: column;
+    animation: dialog-pop-b-xc0yi4vorz 180ms ease-out;
+}
+
+.dialog-header[b-xc0yi4vorz] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(108, 99, 255, 0.22);
+}
+
+.dialog-header h3[b-xc0yi4vorz] {
+    margin: 0;
+    color: #252525;
+    font-size: 1.02rem;
+    font-weight: 700;
+}
+
+.dialog-close[b-xc0yi4vorz] {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--color-purple);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.dialog-close:hover[b-xc0yi4vorz] {
+    background: rgba(211, 209, 248, 0.35);
+    border-color: rgba(108, 99, 255, 0.4);
+}
+
+.dialog-body[b-xc0yi4vorz] {
+    padding: 0.95rem 1rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    overflow-y: auto;
+}
+
+.dialog-field[b-xc0yi4vorz] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.32rem;
+}
+
+.dialog-field label[b-xc0yi4vorz] {
+    font-size: 0.83rem;
+    color: var(--color-purple);
+    font-weight: 700;
+}
+
+.dialog-field input[b-xc0yi4vorz] {
+    padding: 0.58rem 0.72rem;
+    min-height: 44px;
+    border: 1px solid var(--color-purple);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    outline: none;
+    background: #ffffff;
+    color: #252525;
+    transition: box-shadow 0.2s ease;
+}
+
+.dialog-field input:focus[b-xc0yi4vorz] {
+    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.22);
+}
+
+.dialog-field input[b-xc0yi4vorz]::placeholder {
+    color: #a5a1d8;
+}
+
+.dialog-footer[b-xc0yi4vorz] {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem 0.95rem;
+    border-top: 1px solid rgba(108, 99, 255, 0.2);
+}
+
+.btn-cancel[b-xc0yi4vorz] {
+    min-width: 90px;
+    padding: 0.54rem 0.9rem;
+    background: transparent;
+    border: 1px solid var(--color-purple);
+    border-radius: 4px;
+    color: var(--color-purple);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-cancel:hover[b-xc0yi4vorz] {
+    background: rgba(211, 209, 248, 0.36);
+}
+
+.btn-confirm[b-xc0yi4vorz] {
+    min-width: 90px;
+    padding: 0.54rem 0.9rem;
+    background: var(--color-purple);
+    color: white;
+    border: 1px solid var(--color-purple);
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.2s ease;
+}
+
+.btn-confirm:hover[b-xc0yi4vorz] {
+    filter: brightness(1.06);
+}
+
+@media (max-width: 480px) {
+    .dialog-box[b-xc0yi4vorz] {
+        width: 100%;
+        max-height: min(88vh, 640px);
+    }
+
+    .dialog-header[b-xc0yi4vorz] {
+        padding: 0.8rem 0.85rem;
+    }
+
+    .dialog-body[b-xc0yi4vorz] {
+        padding: 0.82rem 0.85rem 0.72rem;
+    }
+
+    .dialog-footer[b-xc0yi4vorz] {
+        justify-content: stretch;
+        padding: 0.72rem 0.85rem 0.85rem;
+    }
+
+    .btn-cancel[b-xc0yi4vorz],
+    .btn-confirm[b-xc0yi4vorz] {
+        flex: 1;
+    }
+}
+
+@keyframes overlay-fade-b-xc0yi4vorz {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes dialog-pop-b-xc0yi4vorz {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

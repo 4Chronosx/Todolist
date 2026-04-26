@@ -1,0 +1,11 @@
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\TaskManager.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\TaskManager.Shared.AssemblyInfoInputs.cache
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\TaskManager.Shared.AssemblyInfo.cs
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\TaskManager.Shared.csproj.CoreCompileInputs.cache
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\bin\Debug\net10.0\TaskManager.Shared.deps.json
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\bin\Debug\net10.0\TaskManager.Shared.dll
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\bin\Debug\net10.0\TaskManager.Shared.pdb
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\TaskManager.Shared.dll
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\refint\TaskManager.Shared.dll
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\TaskManager.Shared.pdb
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\ref\TaskManager.Shared.dll

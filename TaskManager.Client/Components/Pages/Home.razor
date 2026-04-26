@@ -1,0 +1,184 @@
+﻿@page "/"
+@using TaskManager.Shared
+@layout EmptyLayout
+@rendermode InteractiveServer
+@inject TaskApiService TaskApi
+
+<PageTitle>Home</PageTitle>
+
+<main class="page-container @(isDarkTheme ? "dark" : "light")">
+    <div class="page-header">
+        <h1>TODO LIST</h1>
+        <p class="page-subtitle">Stay focused, keep your day organized.</p>
+    </div>
+
+    <div class="search-section">
+        <div class="search-bar">
+            <input class="search-input" type="text" @bind="searchTerm" @bind:event="oninput" placeholder="Search note...">
+            <button class="submit-btn" type="button" aria-label="Search">
+                <i class="fa-solid fa-magnifying-glass icon"></i>
+            </button>
+        </div>
+        <div class="toolbar-actions">
+            <select class="filter-select" name="filter" id="filter" @bind="selectedFilter">
+                <option class="opt" value="all">ALL</option>
+                <option class="opt" value="complete">Complete</option>
+                <option class="opt" value="incomplete">Incomplete</option>
+            </select>
+            <button class="theme-btn" type="button" @onclick="ToggleTheme" aria-label="Toggle theme">
+                <i class="fa-solid @(isDarkTheme ? "fa-sun" : "fa-moon")"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (todos == null) {
+        <p class="empty-state">Loading your todos...</p>
+    } else {
+        <div class="todo-lists">
+        @{ var filteredTodos = FilteredTodos.ToList(); }
+
+        @if (filteredTodos.Count == 0)
+        {
+            <p class="empty-state">No todos match your search/filter.</p>
+        }
+        else
+        {
+            @foreach (var todo in filteredTodos) {
+                <div class="todo-item">
+                    <div class="details">
+                        <input type="checkbox" @bind="todo.IsCompleted" @bind:after="() => UpdateTodo(todo)">
+                        <p class="note-title">@todo.Title</p>
+                    </div>
+                    <div class="action-btns">
+                        <button class="icon-btn" type="button" @onclick="() => OpenUpdateDialog(todo)"><i class="fa-solid fa-pencil"></i></button>
+                        <button class="icon-btn" type="button" @onclick="() => DeleteTodo(todo.Id)"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    }
+
+    <div class="bottom-illustration" aria-hidden="true"></div>
+
+    <button class="add-btn"  @onclick="OpenDialog" aria-label="Add todo">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+    
+
+    <Dialog Title="Todo"
+        IsOpen="isCreateDialogOpen"
+        OnClose="CloseDialog"
+        OnConfirm="HandleConfirm" />
+
+    <Dialog Title="Todo [Update]"
+        IsOpen="isUpdateDialogOpen"
+        OnClose="CloseDialog"
+        OnConfirm="HandleConfirmUpdate" 
+        InitialTitle="@(selectedTodo?.Title ?? string.Empty)"
+        InitialDescription="@(selectedTodo?.Description ?? string.Empty)"
+        
+        />
+    
+</main>
+
+@code {
+    private bool isCreateDialogOpen = false;
+    private bool isUpdateDialogOpen = false;
+    private bool isDarkTheme;
+    private Todo? selectedTodo;
+    private string searchTerm = string.Empty;
+    private string selectedFilter = "all";
+
+    private void OpenDialog() => isCreateDialogOpen = true;
+    private void ToggleTheme() => isDarkTheme = !isDarkTheme;
+
+    private void OpenUpdateDialog(Todo todo)
+    {
+        selectedTodo = todo;
+        isUpdateDialogOpen = true;
+    }
+
+    private void CloseDialog()
+    {
+        isCreateDialogOpen = false;
+        isUpdateDialogOpen = false;
+        selectedTodo = null;
+    }
+
+    private IEnumerable<Todo> FilteredTodos
+    {
+        get
+        {
+            if (todos is null)
+            {
+                return Enumerable.Empty<Todo>();
+            }
+
+            IEnumerable<Todo> query = todos;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.Trim();
+                query = query.Where(todo =>
+                    todo.Title.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    (todo.Description?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false));
+            }
+
+            query = selectedFilter switch
+            {
+                "complete" => query.Where(todo => todo.IsCompleted),
+                "incomplete" => query.Where(todo => !todo.IsCompleted),
+                _ => query
+            };
+
+            return query;
+        }
+    }
+
+    List<Todo>? todos;
+    private async Task HandleConfirm((string Title, string Description) data)
+    {
+        var newTodo = new Todo { Title = data.Title, Description = data.Description };
+        await AddTodo(newTodo);
+        CloseDialog();
+    }
+
+    private async Task HandleConfirmUpdate((string Title, string Description) data)
+    {
+        if (selectedTodo is null)
+        {
+            return;
+        }
+
+        var updatedTodo = new Todo
+        {
+            Id = selectedTodo.Id,
+            Title = data.Title,
+            Description = data.Description,
+            IsCompleted = selectedTodo.IsCompleted,
+            CreatedAt = selectedTodo.CreatedAt
+        };
+
+        await UpdateTodo(updatedTodo);
+        CloseDialog();
+    }
+    protected override async Task OnInitializedAsync() {
+        todos = await TaskApi.GetAllAsync();
+    }
+
+    async Task AddTodo(Todo todo) {
+        await TaskApi.CreateAsync(todo);
+        todos = await TaskApi.GetAllAsync();
+    }
+
+    async Task UpdateTodo(Todo todo) {
+        await TaskApi.UpdateAsync(todo);
+        todos = await TaskApi.GetAllAsync();
+    }
+
+    async Task DeleteTodo(int id) {
+        await TaskApi.DeleteAsync(id);
+        todos = await TaskApi.GetAllAsync();
+    }
+}
