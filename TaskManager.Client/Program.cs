@@ -10,7 +10,7 @@ builder.Services.AddRazorComponents()
 var todoApiBaseUrl = builder.Configuration.GetValue<string>("TodoApi:BaseUrl");
 if (string.IsNullOrWhiteSpace(todoApiBaseUrl))
 {
-    throw new InvalidOperationException("Missing configuration value for TodoApi:BaseUrl.");
+    todoApiBaseUrl = "http://localhost:5193/";
 }
 
 builder.Services.AddScoped(sp => 
