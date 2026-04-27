@@ -110,7 +110,7 @@
     private string selectedFilter = "all";
     private string backendUnavailableMessage = "The server is waking up, please wait...";
     private CancellationTokenSource? autoRetryCts;
-    private static readonly TimeSpan AutoRetryInterval = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan AutoRetryInterval = TimeSpan.FromSeconds(75);
     private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan WakeUpTimeout = TimeSpan.FromSeconds(75);
 
