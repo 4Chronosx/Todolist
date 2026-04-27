@@ -12,6 +12,7 @@
           "Microsoft.AspNetCore.OpenApi": "10.0.3",
           "Microsoft.EntityFrameworkCore.InMemory": "10.0.7",
           "NSwag.AspNetCore": "14.7.1",
+          "TaskManager.Client": "1.0.0",
           "TaskManager.Shared": "1.0.0"
         },
         "runtime": {
@@ -242,6 +243,17 @@
           }
         }
       },
+      "TaskManager.Client/1.0.0": {
+        "dependencies": {
+          "TaskManager.Shared": "1.0.0"
+        },
+        "runtime": {
+          "TaskManager.Client.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "TaskManager.Shared/1.0.0": {
         "runtime": {
           "TaskManager.Shared.dll": {
@@ -397,6 +409,11 @@
       "sha512": "sha512-SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA==",
       "path": "yamldotnet/16.3.0",
       "hashPath": "yamldotnet.16.3.0.nupkg.sha512"
+    },
+    "TaskManager.Client/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     },
     "TaskManager.Shared/1.0.0": {
       "type": "project",
