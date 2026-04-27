@@ -295,8 +295,75 @@ input[type="checkbox"]:focus {
     font-weight: 600;
 }
 
+.status-panel {
+    width: min(100%, 600px);
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 1rem;
+}
+
+.status-panel .empty-state {
+    margin: 0;
+}
+
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid rgba(108, 99, 255, 0.22);
+    border-top-color: var(--color-purple);
+    border-radius: 50%;
+    animation: spin 0.85s linear infinite;
+}
+
+.retry-btn {
+    min-height: 40px;
+    padding: 0 1rem;
+    border: none;
+    border-radius: 4px;
+    background: var(--color-purple);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.retry-btn:hover {
+    filter: brightness(1.06);
+}
+
+.retry-btn:active {
+    transform: translateY(1px);
+}
+
+.retry-btn:disabled {
+    opacity: 0.72;
+    cursor: not-allowed;
+}
+
+.retry-hint {
+    margin: 0;
+    color: #77728f;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
 .page-container.dark .empty-state {
     color: #b1aecf;
+}
+
+.page-container.dark .retry-hint {
+    color: #b1aecf;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .bottom-illustration {
@@ -381,6 +448,11 @@ input[type="checkbox"]:focus {
     }
 
     .todo-lists {
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .status-panel {
         width: 100%;
         max-width: 600px;
     }

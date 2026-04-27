@@ -2,6 +2,7 @@
 @using TaskManager.Shared
 @layout EmptyLayout
 @rendermode InteractiveServer
+@implements IDisposable
 @inject TaskApiService TaskApi
 
 <PageTitle>TodoList</PageTitle>
@@ -31,32 +32,47 @@
         </div>
     </div>
 
-    @if (todos == null) {
-        <p class="empty-state">Loading your todos...</p>
-    } else {
+    @if (isLoading)
+    {
+        <div class="status-panel" role="status" aria-live="polite">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <p class="empty-state">Loading your todos...</p>
+        </div>
+    }
+    else if (isBackendUnavailable)
+    {
+        <div class="status-panel" role="alert" aria-live="assertive">
+            <p class="empty-state">@backendUnavailableMessage</p>
+            <button class="retry-btn" type="button" @onclick="RetryLoadAsync" disabled="@isLoading">Retry</button>
+            <p class="retry-hint">Auto-retrying every 10 seconds...</p>
+        </div>
+    }
+    else
+    {
         <div class="todo-lists">
-        @{ var filteredTodos = FilteredTodos.ToList(); }
+            @{ var filteredTodos = FilteredTodos.ToList(); }
 
-        @if (filteredTodos.Count == 0)
-        {
-            <p class="empty-state">No todos match your search/filter.</p>
-        }
-        else
-        {
-            @foreach (var todo in filteredTodos) {
-                <div class="todo-item">
-                    <div class="details">
-                        <input type="checkbox" @bind="todo.IsCompleted" @bind:after="() => UpdateTodo(todo)">
-                        <p class="note-title">@todo.Title</p>
-                    </div>
-                    <div class="action-btns">
-                        <button class="icon-btn" type="button" @onclick="() => OpenUpdateDialog(todo)"><i class="fa-solid fa-pencil"></i></button>
-                        <button class="icon-btn" type="button" @onclick="() => DeleteTodo(todo.Id)"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
+            @if (filteredTodos.Count == 0)
+            {
+                <p class="empty-state">No todos match your search/filter.</p>
             }
-        }
-    </div>
+            else
+            {
+                @foreach (var todo in filteredTodos)
+                {
+                    <div class="todo-item">
+                        <div class="details">
+                            <input type="checkbox" @bind="todo.IsCompleted" @bind:after="() => UpdateTodo(todo)">
+                            <p class="note-title">@todo.Title</p>
+                        </div>
+                        <div class="action-btns">
+                            <button class="icon-btn" type="button" @onclick="() => OpenUpdateDialog(todo)"><i class="fa-solid fa-pencil"></i></button>
+                            <button class="icon-btn" type="button" @onclick="() => DeleteTodo(todo.Id)"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
     }
 
     <div class="bottom-illustration" aria-hidden="true"></div>
@@ -86,9 +102,14 @@
     private bool isCreateDialogOpen = false;
     private bool isUpdateDialogOpen = false;
     private bool isDarkTheme;
+    private bool isLoading = true;
+    private bool isBackendUnavailable;
     private Todo? selectedTodo;
     private string searchTerm = string.Empty;
     private string selectedFilter = "all";
+    private string backendUnavailableMessage = "The server is waking up, please wait...";
+    private CancellationTokenSource? autoRetryCts;
+    private static readonly TimeSpan AutoRetryInterval = TimeSpan.FromSeconds(10);
 
     private void OpenDialog() => isCreateDialogOpen = true;
     private void ToggleTheme() => isDarkTheme = !isDarkTheme;
@@ -137,6 +158,102 @@
     }
 
     List<Todo>? todos;
+
+    private async Task RetryLoadAsync()
+    {
+        await LoadTodosAsync(startAutoRetryOnFailure: true);
+    }
+
+    private async Task LoadTodosAsync(bool startAutoRetryOnFailure)
+    {
+        isLoading = true;
+
+        try
+        {
+            todos = await TaskApi.GetAllAsync() ?? new List<Todo>();
+            isBackendUnavailable = false;
+            StopAutoRetry();
+        }
+        catch
+        {
+            SetBackendUnavailableState();
+
+            if (startAutoRetryOnFailure)
+            {
+                StartAutoRetry();
+            }
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SetBackendUnavailableState()
+    {
+        isBackendUnavailable = true;
+        backendUnavailableMessage = "The server is waking up, please wait...";
+    }
+
+    private void StartAutoRetry()
+    {
+        if (autoRetryCts is not null)
+        {
+            return;
+        }
+
+        autoRetryCts = new CancellationTokenSource();
+        _ = AutoRetryLoopAsync(autoRetryCts.Token);
+    }
+
+    private async Task AutoRetryLoopAsync(CancellationToken token)
+    {
+        try
+        {
+            using var timer = new PeriodicTimer(AutoRetryInterval);
+
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                if (!isBackendUnavailable || isLoading)
+                {
+                    continue;
+                }
+
+                await InvokeAsync(async () =>
+                {
+                    await LoadTodosAsync(startAutoRetryOnFailure: false);
+                    StateHasChanged();
+                });
+
+                if (!isBackendUnavailable)
+                {
+                    break;
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // No action needed when retries are canceled.
+        }
+    }
+
+    private void StopAutoRetry()
+    {
+        if (autoRetryCts is null)
+        {
+            return;
+        }
+
+        autoRetryCts.Cancel();
+        autoRetryCts.Dispose();
+        autoRetryCts = null;
+    }
+
+    public void Dispose()
+    {
+        StopAutoRetry();
+    }
+
     private async Task HandleConfirm((string Title, string Description) data)
     {
         var newTodo = new Todo { Title = data.Title, Description = data.Description };
@@ -164,21 +281,45 @@
         CloseDialog();
     }
     protected override async Task OnInitializedAsync() {
-        todos = await TaskApi.GetAllAsync();
+        await LoadTodosAsync(startAutoRetryOnFailure: true);
     }
 
     async Task AddTodo(Todo todo) {
-        await TaskApi.CreateAsync(todo);
-        todos = await TaskApi.GetAllAsync();
+        try
+        {
+            await TaskApi.CreateAsync(todo);
+            await LoadTodosAsync(startAutoRetryOnFailure: true);
+        }
+        catch
+        {
+            SetBackendUnavailableState();
+            StartAutoRetry();
+        }
     }
 
     async Task UpdateTodo(Todo todo) {
-        await TaskApi.UpdateAsync(todo);
-        todos = await TaskApi.GetAllAsync();
+        try
+        {
+            await TaskApi.UpdateAsync(todo);
+            await LoadTodosAsync(startAutoRetryOnFailure: true);
+        }
+        catch
+        {
+            SetBackendUnavailableState();
+            StartAutoRetry();
+        }
     }
 
     async Task DeleteTodo(int id) {
-        await TaskApi.DeleteAsync(id);
-        todos = await TaskApi.GetAllAsync();
+        try
+        {
+            await TaskApi.DeleteAsync(id);
+            await LoadTodosAsync(startAutoRetryOnFailure: true);
+        }
+        catch
+        {
+            SetBackendUnavailableState();
+            StartAutoRetry();
+        }
     }
 }
