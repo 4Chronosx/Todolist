@@ -38,9 +38,10 @@ if (app.Environment.IsDevelopment()) {
         config.DocumentPath = "/swagger/{documentName}/swagger.json";
         config.DocExpansion = "list";
     });
+    app.UseCors("BlazorClient");
 }
 
-app.UseCors("BlazorClient");
+
 
 app.MapGet("/todoitems", async(TodoDb db) =>
     await db.Todos.ToListAsync());
