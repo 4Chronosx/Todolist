@@ -44,7 +44,7 @@
         <div class="status-panel" role="alert" aria-live="assertive">
             <p class="empty-state">@backendUnavailableMessage</p>
             <button class="retry-btn" type="button" @onclick="RetryLoadAsync" disabled="@isLoading">Retry</button>
-            <p class="retry-hint">Auto-retrying every 10 seconds...</p>
+            <p class="retry-hint">Retrying in @retryCountdown second(s)...</p>
         </div>
     }
     else
@@ -104,6 +104,7 @@
     private bool isDarkTheme;
     private bool isLoading = true;
     private bool isBackendUnavailable;
+    private int retryCountdown;
     private Todo? selectedTodo;
     private string searchTerm = string.Empty;
     private string selectedFilter = "all";
@@ -212,10 +213,15 @@
     {
         try
         {
-            using var timer = new PeriodicTimer(AutoRetryInterval);
-
-            while (await timer.WaitForNextTickAsync(token))
+            while (!token.IsCancellationRequested)
             {
+                for (int s = (int)AutoRetryInterval.TotalSeconds; s > 0; s--)
+                {
+                    token.ThrowIfCancellationRequested();
+                    await InvokeAsync(() => { retryCountdown = s; StateHasChanged(); });
+                    await Task.Delay(1000, token);
+                }
+
                 if (!isBackendUnavailable || isLoading)
                 {
                     continue;

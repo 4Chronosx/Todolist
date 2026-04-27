@@ -17,20 +17,33 @@ public class TaskApiService(HttpClient http)
         };
         request.Headers.Pragma.ParseAdd("no-cache");
 
-        using var response = await http.SendAsync(
-            request,
-            HttpCompletionOption.ResponseHeadersRead,
-            cancellationToken);
-
-        if (response.StatusCode == HttpStatusCode.ServiceUnavailable ||
-            response.StatusCode == HttpStatusCode.BadGateway ||
-            response.StatusCode == HttpStatusCode.GatewayTimeout)
+        HttpResponseMessage response;
+        try
         {
-            await TryWakeBackendAsync(cancellationToken);
+            response = await http.SendAsync(
+                request,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+        }
+        catch when (!cancellationToken.IsCancellationRequested)
+        {
+            // Server is unreachable (connection refused, DNS failure, etc.) — fire wake ping and rethrow.
+            _ = TryWakeBackendAsync(CancellationToken.None);
+            throw;
         }
 
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<List<Todo>>(cancellationToken: cancellationToken);
+        using (response)
+        {
+            if (response.StatusCode == HttpStatusCode.ServiceUnavailable ||
+                response.StatusCode == HttpStatusCode.BadGateway ||
+                response.StatusCode == HttpStatusCode.GatewayTimeout)
+            {
+                await TryWakeBackendAsync(cancellationToken);
+            }
+
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<Todo>>(cancellationToken: cancellationToken);
+        }
     }
 
     private async Task TryWakeBackendAsync(CancellationToken cancellationToken)
