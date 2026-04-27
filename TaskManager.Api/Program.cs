@@ -6,20 +6,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TaskTracker"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Only configure CORS in development (Blazor Client and API share the same origin in production)
-if (builder.Environment.IsDevelopment())
-{
-    var allowedOrigins = builder.Configuration
+var allowedOrigins = builder.Configuration
         .GetSection("Cors:AllowedOrigins")
         .Get<string[]>() ?? ["https://localhost:7001"];
 
-    builder.Services.AddCors(options =>
-        options.AddPolicy("BlazorClient", policy =>
-            policy.WithOrigins(allowedOrigins)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-        ));
-}
+builder.Services.AddCors(options =>
+    options.AddPolicy("BlazorClient", policy =>
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+    ));
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -38,8 +34,9 @@ if (app.Environment.IsDevelopment()) {
         config.DocumentPath = "/swagger/{documentName}/swagger.json";
         config.DocExpansion = "list";
     });
-    app.UseCors("BlazorClient");
 }
+
+app.UseCors("BlazorClient");
 
 
 
