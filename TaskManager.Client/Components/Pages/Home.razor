@@ -110,6 +110,7 @@
     private string backendUnavailableMessage = "The server is waking up, please wait...";
     private CancellationTokenSource? autoRetryCts;
     private static readonly TimeSpan AutoRetryInterval = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(15);
 
     private void OpenDialog() => isCreateDialogOpen = true;
     private void ToggleTheme() => isDarkTheme = !isDarkTheme;
@@ -167,10 +168,11 @@
     private async Task LoadTodosAsync(bool startAutoRetryOnFailure)
     {
         isLoading = true;
+        using var timeoutCts = new CancellationTokenSource(FetchTimeout);
 
         try
         {
-            todos = await TaskApi.GetAllAsync() ?? new List<Todo>();
+            todos = await TaskApi.GetAllAsync(timeoutCts.Token) ?? new List<Todo>();
             isBackendUnavailable = false;
             StopAutoRetry();
         }
