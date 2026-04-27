@@ -112,6 +112,7 @@
     private CancellationTokenSource? autoRetryCts;
     private static readonly TimeSpan AutoRetryInterval = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan WakeUpTimeout = TimeSpan.FromSeconds(75);
 
     private void OpenDialog() => isCreateDialogOpen = true;
     private void ToggleTheme() => isDarkTheme = !isDarkTheme;
@@ -163,13 +164,13 @@
 
     private async Task RetryLoadAsync()
     {
-        await LoadTodosAsync(startAutoRetryOnFailure: true);
+        await LoadTodosAsync(startAutoRetryOnFailure: true, wakeUp: true);
     }
 
-    private async Task LoadTodosAsync(bool startAutoRetryOnFailure)
+    private async Task LoadTodosAsync(bool startAutoRetryOnFailure, bool wakeUp = false)
     {
         isLoading = true;
-        using var timeoutCts = new CancellationTokenSource(FetchTimeout);
+        using var timeoutCts = new CancellationTokenSource(wakeUp ? WakeUpTimeout : FetchTimeout);
 
         try
         {
@@ -229,7 +230,7 @@
 
                 await InvokeAsync(async () =>
                 {
-                    await LoadTodosAsync(startAutoRetryOnFailure: false);
+                    await LoadTodosAsync(startAutoRetryOnFailure: false, wakeUp: true);
                     StateHasChanged();
                 });
 
