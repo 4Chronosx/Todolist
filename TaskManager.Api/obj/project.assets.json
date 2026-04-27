@@ -349,22 +349,6 @@
           }
         }
       },
-      "TaskManager.Client/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v10.0",
-        "dependencies": {
-          "TaskManager.Shared": "1.0.0"
-        },
-        "compile": {
-          "bin/placeholder/TaskManager.Client.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/TaskManager.Client.dll": {}
-        },
-        "frameworkReferences": [
-          "Microsoft.AspNetCore.App"
-        ]
-      },
       "TaskManager.Shared/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
@@ -765,11 +749,6 @@
         "yamldotnet.nuspec"
       ]
     },
-    "TaskManager.Client/1.0.0": {
-      "type": "project",
-      "path": "../TaskManager.Client/TaskManager.Client.csproj",
-      "msbuildProject": "../TaskManager.Client/TaskManager.Client.csproj"
-    },
     "TaskManager.Shared/1.0.0": {
       "type": "project",
       "path": "../TaskManager.Shared/TaskManager.Shared.csproj",
@@ -782,7 +761,6 @@
       "Microsoft.AspNetCore.OpenApi >= 10.0.3",
       "Microsoft.EntityFrameworkCore.InMemory >= 10.0.7",
       "NSwag.AspNetCore >= 14.7.1",
-      "TaskManager.Client >= 1.0.0",
       "TaskManager.Shared >= 1.0.0"
     ]
   },
@@ -811,9 +789,6 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\Christian\\Documents\\03_Coding\\01_Projects\\Kanban-NET\\TaskManager\\TaskManager.Client\\TaskManager.Client.csproj": {
-              "projectPath": "C:\\Users\\Christian\\Documents\\03_Coding\\01_Projects\\Kanban-NET\\TaskManager\\TaskManager.Client\\TaskManager.Client.csproj"
-            },
             "C:\\Users\\Christian\\Documents\\03_Coding\\01_Projects\\Kanban-NET\\TaskManager\\TaskManager.Shared\\TaskManager.Shared.csproj": {
               "projectPath": "C:\\Users\\Christian\\Documents\\03_Coding\\01_Projects\\Kanban-NET\\TaskManager\\TaskManager.Shared\\TaskManager.Shared.csproj"
             }
