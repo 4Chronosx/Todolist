@@ -6,18 +6,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TaskTracker"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
-if (allowedOrigins.Length == 0)
+// Only configure CORS in development (Blazor Client and API share the same origin in production)
+if (builder.Environment.IsDevelopment())
 {
-    throw new InvalidOperationException("Missing configuration values for Cors:AllowedOrigins.");
+    var allowedOrigins = builder.Configuration
+        .GetSection("Cors:AllowedOrigins")
+        .Get<string[]>() ?? ["https://localhost:7001"];
+
+    builder.Services.AddCors(options =>
+        options.AddPolicy("BlazorClient", policy =>
+            policy.WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+        ));
 }
 
-builder.Services.AddCors(options =>
-    options.AddPolicy("BlazorClient", policy =>
-        policy.WithOrigins(allowedOrigins)
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-    ));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(config => {
