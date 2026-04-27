@@ -9,3 +9,4 @@ C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskMa
 C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\refint\TaskManager.Shared.dll
 C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\TaskManager.Shared.pdb
 C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\ref\TaskManager.Shared.dll
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Shared\obj\Debug\net10.0\TaskManager.Shared.sourcelink.json
