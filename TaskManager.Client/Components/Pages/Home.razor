@@ -104,15 +104,18 @@
     private bool isDarkTheme;
     private bool isLoading = true;
     private bool isBackendUnavailable;
+    private bool wakeUpFired = false;
     private int retryCountdown;
     private Todo? selectedTodo;
     private string searchTerm = string.Empty;
     private string selectedFilter = "all";
     private string backendUnavailableMessage = "The server is waking up, please wait...";
     private CancellationTokenSource? autoRetryCts;
-    private static readonly TimeSpan AutoRetryInterval = TimeSpan.FromSeconds(75);
-    private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(15);
-    private static readonly TimeSpan WakeUpTimeout = TimeSpan.FromSeconds(75);
+    // Short probe to detect if backend is down; long timeout for explicit user retry
+    private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(8);
+    private static readonly TimeSpan RetryTimeout = TimeSpan.FromSeconds(30);
+    // Poll every 15s — catches the backend as soon as Render finishes its cold start
+    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(15);
 
     private void OpenDialog() => isCreateDialogOpen = true;
     private void ToggleTheme() => isDarkTheme = !isDarkTheme;
@@ -163,8 +166,8 @@
     List<Todo>? todos;
 
     private Task RetryLoadAsync() =>
-        LoadTodosAsync(startAutoRetryOnFailure: true, timeout: WakeUpTimeout);
-    
+        LoadTodosAsync(startAutoRetryOnFailure: true, timeout: RetryTimeout);
+
 
     private async Task LoadTodosAsync(bool startAutoRetryOnFailure, TimeSpan? timeout = null)
     {
@@ -173,8 +176,9 @@
 
         try
         {
-            todos = await TaskApi.GetAllAsync(timeoutCts.Token) ?? new List<Todo>();
+            todos = await TaskApi.GetAllAsync(timeoutCts.Token) ?? [];
             isBackendUnavailable = false;
+            wakeUpFired = false;
             StopAutoRetry();
         }
         catch
@@ -183,6 +187,12 @@
 
             if (startAutoRetryOnFailure)
             {
+                if (!wakeUpFired)
+                {
+                    wakeUpFired = true;
+                    // Keeps Render's connection alive through the entire cold start window
+                    _ = TaskApi.WakeUpAsync();
+                }
                 StartAutoRetry();
             }
         }
@@ -215,7 +225,7 @@
         {
             while (!token.IsCancellationRequested)
             {
-                for (int s = (int)AutoRetryInterval.TotalSeconds; s > 0; s--)
+                for (int s = (int)PollInterval.TotalSeconds; s > 0; s--)
                 {
                     token.ThrowIfCancellationRequested();
                     await InvokeAsync(() => { retryCountdown = s; StateHasChanged(); });
@@ -229,7 +239,7 @@
 
                 await InvokeAsync(async () =>
                 {
-                    await LoadTodosAsync(startAutoRetryOnFailure: false, timeout: WakeUpTimeout);
+                    await LoadTodosAsync(startAutoRetryOnFailure: false);
                     StateHasChanged();
                 });
 

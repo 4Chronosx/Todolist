@@ -6,6 +6,17 @@ using TaskManager.Shared;
 
 public class TaskApiService(HttpClient http)
 {
+    // Fire-and-forget: keeps Render's connection alive during cold start (up to 120s)
+    public async Task WakeUpAsync()
+    {
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+            await http.GetAsync("health", cts.Token);
+        }
+        catch { }
+    }
+
     public async Task<List<Todo>?> GetAllAsync(CancellationToken cancellationToken = default)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, "todoitems");

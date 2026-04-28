@@ -38,7 +38,7 @@ if (app.Environment.IsDevelopment()) {
 
 app.UseCors("BlazorClient");
 
-
+app.MapGet("/health", () => Results.Ok());
 
 app.MapGet("/todoitems", async(TodoDb db) =>
     await db.Todos.ToListAsync());
