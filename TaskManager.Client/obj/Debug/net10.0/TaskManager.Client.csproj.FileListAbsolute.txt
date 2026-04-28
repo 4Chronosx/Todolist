@@ -85,8 +85,8 @@ C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskMa
 C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\obj\Debug\net10.0\scopedcss\Components\Pages\Home.razor.rz.scp.css
 C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\obj\Debug\net10.0\scopedcss\Components\Shared\Dialog.razor.rz.scp.css
 C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\obj\Debug\net10.0\compressed\32u640hdq2-{0}-3vjgngf049-3vjgngf049.gz
-C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\obj\Debug\net10.0\compressed\frtjj8ct4m-{0}-m0yufwx37p-m0yufwx37p.gz
-C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\obj\Debug\net10.0\compressed\xzf3b0f80n-{0}-m0yufwx37p-m0yufwx37p.gz
 C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\obj\Debug\net10.0\TaskManager.Client.sourcelink.json
 C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\bin\Debug\net10.0\appsettings.Development.json
 C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\bin\Debug\net10.0\appsettings.json
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\obj\Debug\net10.0\compressed\frtjj8ct4m-{0}-ekuxi6rifo-ekuxi6rifo.gz
+C:\Users\Christian\Documents\03_Coding\01_Projects\Kanban-NET\TaskManager\TaskManager.Client\obj\Debug\net10.0\compressed\xzf3b0f80n-{0}-ekuxi6rifo-ekuxi6rifo.gz

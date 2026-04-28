@@ -2,7 +2,6 @@
 @using TaskManager.Shared
 @layout EmptyLayout
 @rendermode InteractiveServer
-@implements IDisposable
 @inject TaskApiService TaskApi
 
 <PageTitle>TodoList</PageTitle>
@@ -44,7 +43,6 @@
         <div class="status-panel" role="alert" aria-live="assertive">
             <p class="empty-state">@backendUnavailableMessage</p>
             <button class="retry-btn" type="button" @onclick="RetryLoadAsync" disabled="@isLoading">Retry</button>
-            <p class="retry-hint">Retrying in @retryCountdown second(s)...</p>
         </div>
     }
     else
@@ -104,18 +102,10 @@
     private bool isDarkTheme;
     private bool isLoading = true;
     private bool isBackendUnavailable;
-    private bool wakeUpFired = false;
-    private int retryCountdown;
     private Todo? selectedTodo;
     private string searchTerm = string.Empty;
     private string selectedFilter = "all";
     private string backendUnavailableMessage = "The server is waking up, please wait...";
-    private CancellationTokenSource? autoRetryCts;
-    // Short probe to detect if backend is down; long timeout for explicit user retry
-    private static readonly TimeSpan FetchTimeout = TimeSpan.FromSeconds(8);
-    private static readonly TimeSpan RetryTimeout = TimeSpan.FromSeconds(30);
-    // Poll every 15s — catches the backend as soon as Render finishes its cold start
-    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(15);
 
     private void OpenDialog() => isCreateDialogOpen = true;
     private void ToggleTheme() => isDarkTheme = !isDarkTheme;
@@ -165,36 +155,21 @@
 
     List<Todo>? todos;
 
-    private Task RetryLoadAsync() =>
-        LoadTodosAsync(startAutoRetryOnFailure: true, timeout: RetryTimeout);
+    private Task RetryLoadAsync() => LoadTodosAsync();
 
-
-    private async Task LoadTodosAsync(bool startAutoRetryOnFailure, TimeSpan? timeout = null)
+    private async Task LoadTodosAsync()
     {
         isLoading = true;
-        using var timeoutCts = new CancellationTokenSource(timeout ?? FetchTimeout);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
 
         try
         {
-            todos = await TaskApi.GetAllAsync(timeoutCts.Token) ?? [];
+            todos = await TaskApi.GetAllAsync(cts.Token) ?? [];
             isBackendUnavailable = false;
-            wakeUpFired = false;
-            StopAutoRetry();
         }
         catch
         {
             SetBackendUnavailableState();
-
-            if (startAutoRetryOnFailure)
-            {
-                if (!wakeUpFired)
-                {
-                    wakeUpFired = true;
-                    // Keeps Render's connection alive through the entire cold start window
-                    _ = TaskApi.WakeUpAsync();
-                }
-                StartAutoRetry();
-            }
         }
         finally
         {
@@ -206,70 +181,6 @@
     {
         isBackendUnavailable = true;
         backendUnavailableMessage = "The server is waking up, please wait...";
-    }
-
-    private void StartAutoRetry()
-    {
-        if (autoRetryCts is not null)
-        {
-            return;
-        }
-
-        autoRetryCts = new CancellationTokenSource();
-        _ = AutoRetryLoopAsync(autoRetryCts.Token);
-    }
-
-    private async Task AutoRetryLoopAsync(CancellationToken token)
-    {
-        try
-        {
-            while (!token.IsCancellationRequested)
-            {
-                for (int s = (int)PollInterval.TotalSeconds; s > 0; s--)
-                {
-                    token.ThrowIfCancellationRequested();
-                    await InvokeAsync(() => { retryCountdown = s; StateHasChanged(); });
-                    await Task.Delay(1000, token);
-                }
-
-                if (!isBackendUnavailable || isLoading)
-                {
-                    continue;
-                }
-
-                await InvokeAsync(async () =>
-                {
-                    await LoadTodosAsync(startAutoRetryOnFailure: false);
-                    StateHasChanged();
-                });
-
-                if (!isBackendUnavailable)
-                {
-                    break;
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // No action needed when retries are canceled.
-        }
-    }
-
-    private void StopAutoRetry()
-    {
-        if (autoRetryCts is null)
-        {
-            return;
-        }
-
-        autoRetryCts.Cancel();
-        autoRetryCts.Dispose();
-        autoRetryCts = null;
-    }
-
-    public void Dispose()
-    {
-        StopAutoRetry();
     }
 
     private async Task HandleConfirm((string Title, string Description) data)
@@ -299,19 +210,18 @@
         CloseDialog();
     }
     protected override async Task OnInitializedAsync() {
-        await LoadTodosAsync(startAutoRetryOnFailure: true);
+        await LoadTodosAsync();
     }
 
     async Task AddTodo(Todo todo) {
         try
         {
             await TaskApi.CreateAsync(todo);
-            await LoadTodosAsync(startAutoRetryOnFailure: true);
+            await LoadTodosAsync();
         }
         catch
         {
             SetBackendUnavailableState();
-            StartAutoRetry();
         }
     }
 
@@ -319,12 +229,11 @@
         try
         {
             await TaskApi.UpdateAsync(todo);
-            await LoadTodosAsync(startAutoRetryOnFailure: true);
+            await LoadTodosAsync();
         }
         catch
         {
             SetBackendUnavailableState();
-            StartAutoRetry();
         }
     }
 
@@ -332,12 +241,11 @@
         try
         {
             await TaskApi.DeleteAsync(id);
-            await LoadTodosAsync(startAutoRetryOnFailure: true);
+            await LoadTodosAsync();
         }
         catch
         {
             SetBackendUnavailableState();
-            StartAutoRetry();
         }
     }
 }
