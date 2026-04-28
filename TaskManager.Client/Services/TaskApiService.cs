@@ -17,56 +17,15 @@ public class TaskApiService(HttpClient http)
         };
         request.Headers.Pragma.ParseAdd("no-cache");
 
-        HttpResponseMessage response;
-        try
-        {
-            response = await http.SendAsync(
-                request,
-                HttpCompletionOption.ResponseHeadersRead,
-                cancellationToken);
-        }
-        catch when (!cancellationToken.IsCancellationRequested)
-        {
-            // Server is unreachable (connection refused, DNS failure, etc.) — fire wake ping and rethrow.
-            _ = TryWakeBackendAsync(CancellationToken.None);
-            throw;
-        }
+        var response = await http.SendAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken);
 
         using (response)
         {
-            if (response.StatusCode == HttpStatusCode.ServiceUnavailable ||
-                response.StatusCode == HttpStatusCode.BadGateway ||
-                response.StatusCode == HttpStatusCode.GatewayTimeout)
-            {
-                await TryWakeBackendAsync(cancellationToken);
-            }
-
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<List<Todo>>(cancellationToken: cancellationToken);
-        }
-    }
-
-    private async Task TryWakeBackendAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            using var wakeRequest = new HttpRequestMessage(HttpMethod.Get, string.Empty);
-            wakeRequest.Headers.CacheControl = new CacheControlHeaderValue
-            {
-                NoCache = true,
-                NoStore = true,
-                MustRevalidate = true
-            };
-            wakeRequest.Headers.Pragma.ParseAdd("no-cache");
-
-            using var _ = await http.SendAsync(
-                wakeRequest,
-                HttpCompletionOption.ResponseHeadersRead,
-                cancellationToken);
-        }
-        catch
-        {
-            // Best-effort wake-up ping. Caller handles user-facing retries.
         }
     }
 

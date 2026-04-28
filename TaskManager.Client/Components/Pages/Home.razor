@@ -162,15 +162,14 @@
 
     List<Todo>? todos;
 
-    private async Task RetryLoadAsync()
-    {
-        await LoadTodosAsync(startAutoRetryOnFailure: true, wakeUp: true);
-    }
+    private Task RetryLoadAsync() =>
+        LoadTodosAsync(startAutoRetryOnFailure: true, timeout: WakeUpTimeout);
+    
 
-    private async Task LoadTodosAsync(bool startAutoRetryOnFailure, bool wakeUp = false)
+    private async Task LoadTodosAsync(bool startAutoRetryOnFailure, TimeSpan? timeout = null)
     {
         isLoading = true;
-        using var timeoutCts = new CancellationTokenSource(wakeUp ? WakeUpTimeout : FetchTimeout);
+        using var timeoutCts = new CancellationTokenSource(timeout ?? FetchTimeout);
 
         try
         {
@@ -230,7 +229,7 @@
 
                 await InvokeAsync(async () =>
                 {
-                    await LoadTodosAsync(startAutoRetryOnFailure: false, wakeUp: true);
+                    await LoadTodosAsync(startAutoRetryOnFailure: false, timeout: WakeUpTimeout);
                     StateHasChanged();
                 });
 
